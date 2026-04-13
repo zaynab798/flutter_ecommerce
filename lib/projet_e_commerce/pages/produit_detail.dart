@@ -1,112 +1,233 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_ecommerce/projet_e_commerce/model/class_produit.dart';
+import 'package:flutter_ecommerce/projet_e_commerce/data/list_produits.dart';
+import 'package:flutter_ecommerce/projet_e_commerce/model/class_produit_panier.dart';
+import 'package:flutter_ecommerce/projet_e_commerce/provider/cart_provider.dart';
+import 'package:provider/provider.dart';
 
-class ProduitDetailPage extends StatefulWidget {
-  final Produit produit; // ✅ champ déclaré correctement
-
-  const ProduitDetailPage({super.key, required this.produit});
-
+//class ProductDetail extends StatefulWidget {
+class ProduitDetailScreen extends StatefulWidget {
+  const ProduitDetailScreen({super.key});
   @override
-  State<ProduitDetailPage> createState() => _MyWidgetState();
+  State<ProduitDetailScreen> createState() => _ProduitDetailScreenState();
 }
 
-class _MyWidgetState extends State<ProduitDetailPage> {
+class _ProduitDetailScreenState extends State<ProduitDetailScreen> {
+  //var productInfo = Product();
+
   @override
   Widget build(BuildContext context) {
-    final p = widget.produit;
+    final panier=Provider.of<PanierProvider>(context);
+    final dynamic args = ModalRoute.of(context)!.settings.arguments;
+    int indexProduit;
+    if (args == null || args.toString().isEmpty) {
+      indexProduit = 0;
+    } else {
+      indexProduit = int.parse(args.toString());
+    }
+    final productInfo = AllProductData.Produits[indexProduit];
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(p.title),
-        centerTitle: true,
-        backgroundColor: Colors.blue,
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image du produit
-            Image.network(
-              p.imageUrl,
-              width: double.infinity,
-              height: 300,
-              fit: BoxFit.cover,
-            ),
-
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Titre
-                  Text(
-                    p.title,
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Prix
-                  Text(
-                    '${p.price} TND',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      color: Colors.blue,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Marque & Catégorie
-                  Row(
+      appBar: AppBar(title: Text(productInfo.title)),
+      body: Stack(
+        children: [
+          Container(
+            foregroundDecoration: const BoxDecoration(color: Colors.black12),
+            height: MediaQuery.of(context).size.height * 0.45,
+            width: double.infinity,
+            child: Image.network(productInfo.imageUrl),
+          ),
+          SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            padding: const EdgeInsets.only(top: 16, bottom: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 250.0),
+                Padding(
+                  padding: const EdgeInsets.only(top: 16.0, bottom: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Chip(
-                        label: Text(p.brand),
-                        backgroundColor: Colors.grey[200],
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          splashColor: Colors.purple.shade200,
+                          borderRadius: BorderRadius.circular(30.0),
+                          onTap: () {},
+                          child: const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Icon(
+                              Icons.save,
+                              size: 23,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
                       ),
-                      const SizedBox(width: 8),
-                      Chip(
-                        label: Text(p.produitCategoryName),
-                        backgroundColor: Colors.blue[50],
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          splashColor: Colors.purple.shade200,
+                          borderRadius: BorderRadius.circular(30.0),
+                          onTap: () {},
+                          child: const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Icon(
+                              Icons.share,
+                              size: 23,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-
-                  // Quantité
-                  Text(
-                    'Quantité disponible : ${p.quantity}',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
+                ),
+                Container(
+                  color: Colors.grey[300],
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          productInfo.description,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Text(
+                        productInfo.price.toString(),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
+                        ),
+                      ),
+                      const Divider(),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          productInfo.description,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      const Divider(),
+                      infoProduct("Brand", productInfo.brand),
+                      infoProduct("Quantity", productInfo.quantity.toString()),
+                      infoProduct("Category", productInfo.produitCategoryName),
+                    ],
                   ),
-                  const Divider(height: 24),
-
-                  // Description
-                  const Text(
-                    'Description',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                ),
+                Container(
+                  color: Colors.white,
+                  width: double.infinity,
+                  child: const Column(
+                    children: [
+                      Text(
+                        "Aucun Review",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 21,
+                        ),
+                      ),
+                      Text(
+                        "Be the first to revview ...",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    p.description,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.black87,
-                      height: 1.5,
+                ),
+                //bouton en bas
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: ElevatedButton(
+                       onPressed: () {
+                        panier.ajouterProduit(ProduitPanier(
+                          id: productInfo.id,
+                          title: productInfo.title,
+                          description: productInfo.description,
+                          price: productInfo.price,
+                          imageUrl: productInfo.imageUrl,
+                          quantite: 1,
+                        ));
+                      },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.pink,
+                          foregroundColor: Colors.white,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.zero,
+                          ),
+                        ),
+                        child: const Text("Add to Cart"),
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          print("ee");
+                        },
+                        label: const Text("Buy Now"),
+                        icon: const Icon(Icons.credit_card),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.zero,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          print("ee");
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.zero,
+                          ),
+                        ),
+                        child: Icon(Icons.favorite),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget infoProduct(String name, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8.0),
+      child: Row(
+        children: [
+          Text(
+            "$name:",
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          SizedBox(width: 10),
+          Text(
+            value,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+            ),
+          ),
+        ],
       ),
     );
   }
